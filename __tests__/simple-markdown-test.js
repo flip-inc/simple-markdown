@@ -2832,8 +2832,6 @@ describe("simple markdown", function() {
                 ]);
             });
         });
-
-        console.warn = oldconsolewarn;
       });
     });
 
@@ -3525,4 +3523,3 @@ describe("simple markdown", function() {
             assert.deepEqual(elements, "hi, there!");
         });
     });
-});
