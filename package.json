@@ -2,8 +2,9 @@
   "name": "simple-markdown",
   "version": "0.3.1",
   "description": "Javascript markdown parsing, made simple",
-  "main": "main.js",
+  "main": "index.js",
   "scripts": {
+    "build": "babel lib --out-dir build",
     "test": "make test && size-limit",
     "lint": "eslint ./"
   },

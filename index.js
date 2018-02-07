@@ -1,2 +1,2 @@
 /* @flow */
-module.exports = require('./main.js');
+module.exports = require('./build/main.js');
