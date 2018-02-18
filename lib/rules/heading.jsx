@@ -15,7 +15,7 @@ const heading = {
     const Node = `h${node.level}`;
 
     const compiledOutput = output(node.content, state);
-    let id = '';
+    let id = null;
 
     if (compiledOutput.length === 1 && typeof compiledOutput[0] === 'string') {
       id = slugify(compiledOutput[0]);
