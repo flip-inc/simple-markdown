@@ -31,7 +31,7 @@ var heading = {
     var id = null;
 
     if (compiledOutput.length === 1 && typeof compiledOutput[0] === 'string') {
-      id = (0, _slugify2.default)(compiledOutput[0]);
+      id = (0, _slugify2.default)(compiledOutput[0], { lower: true });
     }
 
     return _react2.default.createElement(
