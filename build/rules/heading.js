@@ -8,6 +8,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _slugify = require('slugify');
+
+var _slugify2 = _interopRequireDefault(_slugify);
+
 var _utils = require('../utils');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -22,10 +26,18 @@ var heading = {
   },
   react: function react(node, output, state) {
     var Node = 'h' + node.level;
+
+    var compiledOutput = output(node.content, state);
+    var id = '';
+
+    if (compiledOutput.length === 1 && typeof compiledOutput[0] === 'string') {
+      id = (0, _slugify2.default)(compiledOutput[0]);
+    }
+
     return _react2.default.createElement(
       Node,
-      { key: state.key },
-      output(node.content, state)
+      { id: id, key: state.key },
+      compiledOutput
     );
   },
   html: function html(node, output, state) {
