@@ -28,7 +28,7 @@ var heading = {
     var Node = 'h' + node.level;
 
     var compiledOutput = output(node.content, state);
-    var id = '';
+    var id = null;
 
     if (compiledOutput.length === 1 && typeof compiledOutput[0] === 'string') {
       id = (0, _slugify2.default)(compiledOutput[0]);
