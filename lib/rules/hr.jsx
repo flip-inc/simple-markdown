@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { ignoreCapture } from '../utils/parse';
 import { blockRegex } from '../utils/regex';
 
 const hr = {

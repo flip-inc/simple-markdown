@@ -38,6 +38,7 @@
     "lodash": "^4.17.4",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
+    "slugify": "^1.2.9",
     "underscore": "^1.8.3"
   }
 }

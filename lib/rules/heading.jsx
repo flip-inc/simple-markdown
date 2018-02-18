@@ -1,4 +1,5 @@
 import React from 'react';
+import slugify from 'slugify';
 
 import { getHtmlTag, blockRegex, parseInline } from '../utils';
 
@@ -12,9 +13,17 @@ const heading = {
   },
   react(node, output, state) {
     const Node = `h${node.level}`;
+
+    const compiledOutput = output(node.content, state);
+    let id = '';
+
+    if (compiledOutput.length === 1 && typeof compiledOutput[0] === 'string') {
+      id = slugify(compiledOutput[0]);
+    }
+
     return (
-      <Node key={state.key}>
-        {output(node.content, state)}
+      <Node id={id} key={state.key}>
+        {compiledOutput}
       </Node>
     );
   },
