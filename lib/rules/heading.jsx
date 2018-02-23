@@ -18,10 +18,7 @@ const heading = {
     let id = null;
 
     if (compiledOutput.length === 1 && typeof compiledOutput[0] === 'string') {
-      id = slugify(compiledOutput[0], {
-        lower: true,
-        remove: /[$*_+~.()'"!\-:@]/g,
-      });
+      id = slugify(compiledOutput[0], { lower: true }).replace(/[^a-zA-Z0-9-]/g, '');
     }
 
     return (
