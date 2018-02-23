@@ -33,7 +33,7 @@ var heading = {
     if (compiledOutput.length === 1 && typeof compiledOutput[0] === 'string') {
       id = (0, _slugify2.default)(compiledOutput[0], {
         lower: true,
-        remove: /[^a-zA-Z0-9-]/g
+        remove: /[$*_+~.()'"!\-:@]/g
       });
     }
 
