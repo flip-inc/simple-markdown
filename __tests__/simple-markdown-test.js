@@ -3,7 +3,7 @@ var _ = require("underscore");
 var React = require("react");
 var ReactDOMServer = require("react-dom/server");
 
-var SimpleMarkdown = require("../main.js");
+var SimpleMarkdown = require("../lib/main.js");
 var blockParse = SimpleMarkdown.defaultBlockParse;
 var inlineParse = SimpleMarkdown.defaultInlineParse;
 var implicitParse = SimpleMarkdown.defaultImplicitParse;
@@ -43,7 +43,7 @@ var validateParse = function(parsed, expected) {
 var htmlThroughReact = function(parsed) {
     var output = defaultOutput(parsed);
     var rawHtml = ReactDOMServer.renderToStaticMarkup(
-        React.DOM.div(null, output)
+        <div>{output}</div>
     );
     var innerHtml = rawHtml
         .replace(/^<div>/, '')
@@ -2876,22 +2876,22 @@ describe("simple markdown", function() {
         it("should output headings", function() {
             assertParsesToReact(
                 "### Heading!\n\n",
-                "<h3>Heading!</h3>"
+                "<h3 id=\"heading\">Heading!</h3>"
             );
 
             assertParsesToReact(
                 "## hi! ##\n\n",
-                "<h2>hi!</h2>"
+                "<h2 id=\"hi\">hi!</h2>"
             );
 
             assertParsesToReact(
                 "Yay!\n====\n\n",
-                "<h1>Yay!</h1>"
+                "<h1 id=\"yay\">Yay!</h1>"
             );
 
             assertParsesToReact(
                 "Success\n---\n\n",
-                "<h2>Success</h2>"
+                "<h2 id=\"success\">Success</h2>"
             );
         });
 
@@ -3026,15 +3026,15 @@ describe("simple markdown", function() {
                 "\n",
                 '<table><thead>' +
                 '<tr>' +
-                '<th style="text-align:left;" scope="col">h1</th>' +
-                '<th style="text-align:center;" scope="col">h2</th>' +
-                '<th style="text-align:right;" scope="col">h3</th>' +
+                '<th style="text-align:left" scope="col">h1</th>' +
+                '<th style="text-align:center" scope="col">h2</th>' +
+                '<th style="text-align:right" scope="col">h3</th>' +
                 '</tr>' +
                 '</thead><tbody>' +
                 '<tr>' +
-                '<td style="text-align:left;">d1</td>' +
-                '<td style="text-align:center;">d2</td>' +
-                '<td style="text-align:right;">d3</td>' +
+                '<td style="text-align:left">d1</td>' +
+                '<td style="text-align:center">d2</td>' +
+                '<td style="text-align:right">d3</td>' +
                 '</tr>' +
                 '</tbody></table>'
             );
