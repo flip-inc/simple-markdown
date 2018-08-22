@@ -9,9 +9,9 @@ exports.parseInline = parseInline;
 exports.parseCaptureInline = parseCaptureInline;
 exports.parseRef = parseRef;
 
-var _lodash = require('lodash');
+var _map = require('lodash/map');
 
-var _lodash2 = _interopRequireDefault(_lodash);
+var _map2 = _interopRequireDefault(_map);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -40,7 +40,7 @@ function getHtmlTag(tagName, content, attributes, isClosed) {
   isClosed = typeof isClosed !== 'undefined' ? isClosed : true; // eslint-disable-line no-param-reassign
 
   var attributeString = '';
-  _lodash2.default.map(attributes, function (value, attr) {
+  (0, _map2.default)(attributes, function (value, attr) {
     if (Object.prototype.hasOwnProperty.call(attributes, attr) && attributes[attr]) {
       attributeString += ' ' + attr + '="' + attributes[attr] + '"';
     }

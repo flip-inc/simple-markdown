@@ -4,9 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _lodash = require('lodash');
+var _mapValues = require('lodash/mapValues');
 
-var _lodash2 = _interopRequireDefault(_lodash);
+var _mapValues2 = _interopRequireDefault(_mapValues);
 
 var _autolink = require('./autolink');
 
@@ -149,7 +149,7 @@ var rules = {
 };
 
 var order = 0;
-exports.default = _lodash2.default.mapValues(rules, function (value) {
+exports.default = (0, _mapValues2.default)(rules, function (value) {
   var rule = value;
   rule.order = order;
   order += 1;

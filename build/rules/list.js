@@ -4,9 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _lodash = require('lodash');
+var _map = require('lodash/map');
 
-var _lodash2 = _interopRequireDefault(_lodash);
+var _map2 = _interopRequireDefault(_map);
 
 var _react = require('react');
 
@@ -122,7 +122,7 @@ var list = {
       return _react2.default.createElement(
         'ol',
         { start: node.start, key: state.key },
-        _lodash2.default.map(node.items, function (item, i) {
+        (0, _map2.default)(node.items, function (item, i) {
           return _react2.default.createElement(
             'li',
             { key: i },
@@ -135,7 +135,7 @@ var list = {
     return _react2.default.createElement(
       'ul',
       { key: state.key },
-      _lodash2.default.map(node.items, function (item, i) {
+      (0, _map2.default)(node.items, function (item, i) {
         return _react2.default.createElement(
           'li',
           { key: i },

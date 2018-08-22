@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import map from 'lodash/map';
 import React from 'react';
 
 import { parseTable } from '../utils/tables';
@@ -21,7 +21,7 @@ const table = {
       <table key={state.key}>
         <thead>
           <tr>
-            {_.map(node.header, (content, i) => (
+            {map(node.header, (content, i) => (
               <th key={i} style={getStyle(i)} scope="col">
                 {output(content, state)}
               </th>
@@ -29,9 +29,9 @@ const table = {
           </tr>
         </thead>
         <tbody>
-          {_.map(node.cells, (row, r) => (
+          {map(node.cells, (row, r) => (
             <tr key={r}>
-              {_.map(row, (content, c) => (
+              {map(row, (content, c) => (
                 <td key={c} style={getStyle(c)}>
                   {output(content, state)}
                 </td>
@@ -49,15 +49,15 @@ const table = {
       return `text-align:${node.align[colIndex]};`;
     };
 
-    const headers = _.map(node.header, (content, i) =>
+    const headers = map(node.header, (content, i) =>
       getHtmlTag('th', output(content, state), {
         style: getStyle(i),
         scope: 'col',
       }),
     ).join('');
 
-    const rows = _.map(node.cells, (row) => {
-      const cols = _.map(row, (content, c) =>
+    const rows = map(node.cells, (row) => {
+      const cols = map(row, (content, c) =>
         getHtmlTag('td', output(content, state), { style: getStyle(c) }),
       ).join('');
 

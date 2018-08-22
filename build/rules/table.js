@@ -4,9 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _lodash = require('lodash');
+var _map = require('lodash/map');
 
-var _lodash2 = _interopRequireDefault(_lodash);
+var _map2 = _interopRequireDefault(_map);
 
 var _react = require('react');
 
@@ -41,7 +41,7 @@ var table = {
         _react2.default.createElement(
           'tr',
           null,
-          _lodash2.default.map(node.header, function (content, i) {
+          (0, _map2.default)(node.header, function (content, i) {
             return _react2.default.createElement(
               'th',
               { key: i, style: getStyle(i), scope: 'col' },
@@ -53,11 +53,11 @@ var table = {
       _react2.default.createElement(
         'tbody',
         null,
-        _lodash2.default.map(node.cells, function (row, r) {
+        (0, _map2.default)(node.cells, function (row, r) {
           return _react2.default.createElement(
             'tr',
             { key: r },
-            _lodash2.default.map(row, function (content, c) {
+            (0, _map2.default)(row, function (content, c) {
               return _react2.default.createElement(
                 'td',
                 { key: c, style: getStyle(c) },
@@ -76,15 +76,15 @@ var table = {
       return 'text-align:' + node.align[colIndex] + ';';
     };
 
-    var headers = _lodash2.default.map(node.header, function (content, i) {
+    var headers = (0, _map2.default)(node.header, function (content, i) {
       return (0, _utils.getHtmlTag)('th', output(content, state), {
         style: getStyle(i),
         scope: 'col'
       });
     }).join('');
 
-    var rows = _lodash2.default.map(node.cells, function (row) {
-      var cols = _lodash2.default.map(row, function (content, c) {
+    var rows = (0, _map2.default)(node.cells, function (row) {
+      var cols = (0, _map2.default)(row, function (content, c) {
         return (0, _utils.getHtmlTag)('td', output(content, state), { style: getStyle(c) });
       }).join('');
 

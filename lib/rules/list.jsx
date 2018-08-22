@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import map from 'lodash/map';
 import React from 'react';
 
 import { getHtmlTag } from '../utils';
@@ -111,7 +111,7 @@ const list = {
     if (node.ordered) {
       return (
         <ol start={node.start} key={state.key}>
-          {_.map(node.items, (item, i) => (
+          {map(node.items, (item, i) => (
             <li key={i}>
               {output(item, state)}
             </li>
@@ -122,7 +122,7 @@ const list = {
 
     return (
       <ul key={state.key}>
-        {_.map(node.items, (item, i) => (
+        {map(node.items, (item, i) => (
           <li key={i}>
             {output(item, state)}
           </li>
