@@ -1,48 +1,49 @@
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = void 0;
 
-var _react = require('react');
+var _react = _interopRequireDefault(require("react"));
 
-var _react2 = _interopRequireDefault(_react);
+var _slugify = _interopRequireDefault(require("slugify"));
 
-var _slugify = require('slugify');
-
-var _slugify2 = _interopRequireDefault(_slugify);
-
-var _utils = require('../utils');
+var _utils = require("../utils");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var heading = {
+const heading = {
   match: (0, _utils.blockRegex)(/^ *(#{1,6}) *([^\n]+?) *#* *(?:\n *)+\n/),
-  parse: function parse(capture, _parse, state) {
+
+  parse(capture, parse, state) {
     return {
       level: capture[1].length,
-      content: (0, _utils.parseInline)(_parse, capture[2], state)
+      content: (0, _utils.parseInline)(parse, capture[2], state)
     };
   },
-  react: function react(node, output, state) {
-    var Node = 'h' + node.level;
 
-    var compiledOutput = output(node.content, state);
-    var id = null;
+  react(node, output, state) {
+    const Node = "h".concat(node.level);
+    const compiledOutput = output(node.content, state);
+    let id = null;
 
     if (compiledOutput.length === 1 && typeof compiledOutput[0] === 'string') {
-      id = (0, _slugify2.default)(compiledOutput[0], { lower: true }).replace(/[^a-zA-Z0-9-]/g, '');
+      id = (0, _slugify.default)(compiledOutput[0], {
+        lower: true
+      }).replace(/[^a-zA-Z0-9-]/g, '');
     }
 
-    return _react2.default.createElement(
-      Node,
-      { id: id, key: state.key },
-      compiledOutput
-    );
+    return _react.default.createElement(Node, {
+      id: id,
+      key: state.key
+    }, compiledOutput);
   },
-  html: function html(node, output, state) {
-    return (0, _utils.getHtmlTag)('h' + node.level, output(node.content, state));
-  }
-};
 
-exports.default = heading;
+  html(node, output, state) {
+    return (0, _utils.getHtmlTag)("h".concat(node.level), output(node.content, state));
+  }
+
+};
+var _default = heading;
+exports.default = _default;

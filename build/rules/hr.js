@@ -1,28 +1,23 @@
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = void 0;
 
-var _react = require('react');
+var _react = _interopRequireDefault(require("react"));
 
-var _react2 = _interopRequireDefault(_react);
-
-var _regex = require('../utils/regex');
+var _regex = require("../utils/regex");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var hr = {
+const hr = {
   match: (0, _regex.blockRegex)(/^( *[-*_]){3,} *(?:\n *)+\n/),
-  parse: function parse() {
-    return {};
-  },
-  react: function react(node, output, state) {
-    return _react2.default.createElement('hr', { key: state.key });
-  },
-  html: function html() {
-    return '<hr>';
-  }
+  parse: () => ({}),
+  react: (node, output, state) => _react.default.createElement("hr", {
+    key: state.key
+  }),
+  html: () => '<hr>'
 };
-
-exports.default = hr;
+var _default = hr;
+exports.default = _default;

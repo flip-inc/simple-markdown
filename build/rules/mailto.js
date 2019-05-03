@@ -1,22 +1,21 @@
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = void 0;
 
-var _regex = require('../utils/regex');
+var _regex = require("../utils/regex");
 
-var AUTOLINK_MAILTO_CHECK_R = /mailto:/i;
-
-var mailto = {
+const AUTOLINK_MAILTO_CHECK_R = /mailto:/i;
+const mailto = {
   match: (0, _regex.inlineRegex)(/^<([^ >]+@[^ >]+)>/),
-  parse: function parse(capture) {
-    var address = capture[1];
-    var target = capture[1];
+  parse: capture => {
+    const address = capture[1];
+    let target = capture[1]; // Check for a `mailto:` already existing in the link:
 
-    // Check for a `mailto:` already existing in the link:
     if (!AUTOLINK_MAILTO_CHECK_R.test(target)) {
-      target = 'mailto:' + target;
+      target = "mailto:".concat(target);
     }
 
     return {
@@ -25,9 +24,9 @@ var mailto = {
         type: 'text',
         content: address
       }],
-      target: target
+      target
     };
   }
 };
-
-exports.default = mailto;
+var _default = mailto;
+exports.default = _default;

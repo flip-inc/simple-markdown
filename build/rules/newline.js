@@ -1,22 +1,17 @@
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = void 0;
 
-var _regex = require('../utils/regex');
+var _regex = require("../utils/regex");
 
-var newline = {
+const newline = {
   match: (0, _regex.blockRegex)(/^(?:\n *)*\n/),
-  parse: function parse() {
-    return {};
-  },
-  react: function react() {
-    return '\n';
-  },
-  html: function html() {
-    return '\n';
-  }
+  parse: () => ({}),
+  react: () => '\n',
+  html: () => '\n'
 };
-
-exports.default = newline;
+var _default = newline;
+exports.default = _default;

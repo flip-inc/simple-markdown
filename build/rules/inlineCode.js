@@ -1,36 +1,27 @@
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = void 0;
 
-var _react = require('react');
+var _react = _interopRequireDefault(require("react"));
 
-var _react2 = _interopRequireDefault(_react);
+var _utils = require("../utils");
 
-var _utils = require('../utils');
-
-var _regex = require('../utils/regex');
+var _regex = require("../utils/regex");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var inlineCode = {
+const inlineCode = {
   match: (0, _regex.inlineRegex)(/^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/),
-  parse: function parse(capture) {
-    return {
-      content: capture[2]
-    };
-  },
-  react: function react(node, output, state) {
-    return _react2.default.createElement(
-      'code',
-      { key: state.key },
-      node.content
-    );
-  },
-  html: function html(node) {
-    return (0, _utils.getHtmlTag)('code', node.content);
-  }
+  parse: capture => ({
+    content: capture[2]
+  }),
+  react: (node, output, state) => _react.default.createElement("code", {
+    key: state.key
+  }, node.content),
+  html: node => (0, _utils.getHtmlTag)('code', node.content)
 };
-
-exports.default = inlineCode;
+var _default = inlineCode;
+exports.default = _default;

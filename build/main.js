@@ -1,20 +1,16 @@
-'use strict';
+"use strict";
 
-var _rules = require('./rules');
-
-var _rules2 = _interopRequireDefault(_rules);
+var _rules = _interopRequireDefault(require("./rules"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var CR_NEWLINE_R = /\r\n?/g;
-
 var TAB_R = /\t/g;
-var FORMFEED_R = /\f/g;
-// Turn various crazy whitespace into easy to process things
-var preprocess = function preprocess(source) {
-    return source.replace(CR_NEWLINE_R, '\n').replace(FORMFEED_R, '').replace(TAB_R, '    ');
-};
+var FORMFEED_R = /\f/g; // Turn various crazy whitespace into easy to process things
 
+var preprocess = function preprocess(source) {
+  return source.replace(CR_NEWLINE_R, '\n').replace(FORMFEED_R, '').replace(TAB_R, '    ');
+};
 /**
  * Creates a parser for a given set of rules, with the precedence
  * specified as a list of rules.
@@ -34,327 +30,335 @@ var preprocess = function preprocess(source) {
  *     some nesting is. For an example use-case, see passage-ref
  *     parsing in src/widgets/passage/passage-markdown.jsx
  */
+
+
 var parserFor = function parserFor(rules) {
-    // Sorts rules in order of increasing order, then
-    // ascending rule name in case of ties.
-    var ruleList = Object.keys(rules);
-    ruleList.forEach(function (type) {
-        var order = rules[type].order;
-        if ((typeof order !== 'number' || !isFinite(order)) && typeof console !== 'undefined') {
-            console.warn("simple-markdown: Invalid order for rule `" + type + "`: " + order);
+  // Sorts rules in order of increasing order, then
+  // ascending rule name in case of ties.
+  var ruleList = Object.keys(rules);
+  ruleList.forEach(function (type) {
+    var order = rules[type].order;
+
+    if ((typeof order !== 'number' || !isFinite(order)) && typeof console !== 'undefined') {
+      console.warn("simple-markdown: Invalid order for rule `" + type + "`: " + order);
+    }
+  });
+  ruleList.sort(function (typeA, typeB) {
+    var ruleA = rules[typeA];
+    var ruleB = rules[typeB];
+    var orderA = ruleA.order;
+    var orderB = ruleB.order; // First sort based on increasing order
+
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+
+    var secondaryOrderA = ruleA.quality ? 0 : 1;
+    var secondaryOrderB = ruleB.quality ? 0 : 1;
+
+    if (secondaryOrderA !== secondaryOrderB) {
+      return secondaryOrderA - secondaryOrderB; // Then based on increasing unicode lexicographic ordering
+    } else if (typeA < typeB) {
+      return -1;
+    } else if (typeA > typeB) {
+      return 1;
+    } else {
+      // Rules should never have the same name,
+      // but this is provided for completeness.
+      return 0;
+    }
+  });
+
+  var nestedParse = function nestedParse(source, state) {
+    var result = [];
+    state = state || {}; // We store the previous capture so that match functions can
+    // use some limited amount of lookbehind. Lists use this to
+    // ensure they don't match arbitrary '- ' or '* ' in inline
+    // text (see the list rule for more information).
+
+    var prevCapture = "";
+
+    while (source) {
+      // store the best match, it's rule, and quality:
+      var ruleType = null;
+      var rule = null;
+      var capture = null;
+      var quality = NaN; // loop control variables:
+
+      var i = 0;
+      var currRuleType = ruleList[0];
+      var currRule = rules[currRuleType];
+
+      do {
+        var currOrder = currRule.order;
+        var currCapture = currRule.match(source, state, prevCapture);
+
+        if (currCapture) {
+          var currQuality = currRule.quality ? currRule.quality(currCapture, state, prevCapture) : 0; // This should always be true the first time because
+          // the initial quality is NaN (that's why there's the
+          // condition negation).
+
+          if (!(currQuality <= quality)) {
+            ruleType = currRuleType;
+            rule = currRule;
+            capture = currCapture;
+            quality = currQuality;
+          }
+        } // Move on to the next item.
+        // Note that this makes `currRule` be the next item
+
+
+        i++;
+        currRuleType = ruleList[i];
+        currRule = rules[currRuleType];
+      } while ( // keep looping while we're still within the ruleList
+      currRule && ( // if we don't have a match yet, continue
+      !capture || // or if we have a match, but the next rule is
+      // at the same order, and has a quality measurement
+      // functions, then this rule must have a quality
+      // measurement function (since they are sorted before
+      // those without), and we need to check if there is
+      // a better quality match
+      currRule.order === currOrder && currRule.quality)); // TODO(aria): Write tests for this
+
+
+      if (!capture) {
+        throw new Error("could not find rule to match content: " + source);
+      }
+
+      var parsed = rule.parse(capture, nestedParse, state); // We maintain the same object here so that rules can
+      // store references to the objects they return and
+      // modify them later. (oops sorry! but this adds a lot
+      // of power--see reflinks.)
+
+      if (Array.isArray(parsed)) {
+        Array.prototype.push.apply(result, parsed);
+      } else {
+        // We also let rules override the default type of
+        // their parsed node if they would like to, so that
+        // there can be a single output function for all links,
+        // even if there are several rules to parse them.
+        if (parsed.type == null) {
+          parsed.type = ruleType;
         }
-    });
 
-    ruleList.sort(function (typeA, typeB) {
-        var ruleA = rules[typeA];
-        var ruleB = rules[typeB];
-        var orderA = ruleA.order;
-        var orderB = ruleB.order;
+        result.push(parsed);
+      }
 
-        // First sort based on increasing order
-        if (orderA !== orderB) {
-            return orderA - orderB;
-        }
+      prevCapture = capture[0];
+      source = source.substring(prevCapture.length);
+    }
 
-        var secondaryOrderA = ruleA.quality ? 0 : 1;
-        var secondaryOrderB = ruleB.quality ? 0 : 1;
+    return result;
+  };
 
-        if (secondaryOrderA !== secondaryOrderB) {
-            return secondaryOrderA - secondaryOrderB;
+  var outerParse = function outerParse(source, state) {
+    return nestedParse(preprocess(source), state);
+  };
 
-            // Then based on increasing unicode lexicographic ordering
-        } else if (typeA < typeB) {
-            return -1;
-        } else if (typeA > typeB) {
-            return 1;
-        } else {
-            // Rules should never have the same name,
-            // but this is provided for completeness.
-            return 0;
-        }
-    });
+  return outerParse;
+}; // Creates a match function for an inline scoped element from a regex
 
-    var nestedParse = function nestedParse(source, state) {
-        var result = [];
-        state = state || {};
-        // We store the previous capture so that match functions can
-        // use some limited amount of lookbehind. Lists use this to
-        // ensure they don't match arbitrary '- ' or '* ' in inline
-        // text (see the list rule for more information).
-        var prevCapture = "";
-        while (source) {
-            // store the best match, it's rule, and quality:
-            var ruleType = null;
-            var rule = null;
-            var capture = null;
-            var quality = NaN;
 
-            // loop control variables:
-            var i = 0;
-            var currRuleType = ruleList[0];
-            var currRule = rules[currRuleType];
-
-            do {
-                var currOrder = currRule.order;
-                var currCapture = currRule.match(source, state, prevCapture);
-
-                if (currCapture) {
-                    var currQuality = currRule.quality ? currRule.quality(currCapture, state, prevCapture) : 0;
-                    // This should always be true the first time because
-                    // the initial quality is NaN (that's why there's the
-                    // condition negation).
-                    if (!(currQuality <= quality)) {
-                        ruleType = currRuleType;
-                        rule = currRule;
-                        capture = currCapture;
-                        quality = currQuality;
-                    }
-                }
-
-                // Move on to the next item.
-                // Note that this makes `currRule` be the next item
-                i++;
-                currRuleType = ruleList[i];
-                currRule = rules[currRuleType];
-            } while (
-            // keep looping while we're still within the ruleList
-            currRule && (
-            // if we don't have a match yet, continue
-            !capture ||
-            // or if we have a match, but the next rule is
-            // at the same order, and has a quality measurement
-            // functions, then this rule must have a quality
-            // measurement function (since they are sorted before
-            // those without), and we need to check if there is
-            // a better quality match
-            currRule.order === currOrder && currRule.quality));
-
-            // TODO(aria): Write tests for this
-            if (!capture) {
-                throw new Error("could not find rule to match content: " + source);
-            }
-
-            var parsed = rule.parse(capture, nestedParse, state);
-            // We maintain the same object here so that rules can
-            // store references to the objects they return and
-            // modify them later. (oops sorry! but this adds a lot
-            // of power--see reflinks.)
-            if (Array.isArray(parsed)) {
-                Array.prototype.push.apply(result, parsed);
-            } else {
-                // We also let rules override the default type of
-                // their parsed node if they would like to, so that
-                // there can be a single output function for all links,
-                // even if there are several rules to parse them.
-                if (parsed.type == null) {
-                    parsed.type = ruleType;
-                }
-                result.push(parsed);
-            }
-
-            prevCapture = capture[0];
-            source = source.substring(prevCapture.length);
-        }
-        return result;
-    };
-
-    var outerParse = function outerParse(source, state) {
-        return nestedParse(preprocess(source), state);
-    };
-    return outerParse;
-};
-
-// Creates a match function for an inline scoped element from a regex
 var inlineRegex = function inlineRegex(regex) {
-    var match = function match(source, state) {
-        if (state.inline) {
-            return regex.exec(source);
-        } else {
-            return null;
-        }
-    };
-    match.regex = regex;
-    return match;
-};
+  var match = function match(source, state) {
+    if (state.inline) {
+      return regex.exec(source);
+    } else {
+      return null;
+    }
+  };
 
-// Creates a match function for a block scoped element from a regex
+  match.regex = regex;
+  return match;
+}; // Creates a match function for a block scoped element from a regex
+
+
 var blockRegex = function blockRegex(regex) {
-    var match = function match(source, state) {
-        if (state.inline) {
-            return null;
-        } else {
-            return regex.exec(source);
-        }
-    };
-    match.regex = regex;
-    return match;
-};
+  var match = function match(source, state) {
+    if (state.inline) {
+      return null;
+    } else {
+      return regex.exec(source);
+    }
+  };
 
-// Creates a match function from a regex, ignoring block/inline scope
+  match.regex = regex;
+  return match;
+}; // Creates a match function from a regex, ignoring block/inline scope
+
+
 var anyScopeRegex = function anyScopeRegex(regex) {
-    var match = function match(source, state) {
-        return regex.exec(source);
-    };
-    match.regex = regex;
-    return match;
+  var match = function match(source, state) {
+    return regex.exec(source);
+  };
+
+  match.regex = regex;
+  return match;
 };
 
 var reactFor = function reactFor(outputFunc) {
-    var nestedOutput = function nestedOutput(ast, state) {
-        state = state || {};
-        if (Array.isArray(ast)) {
-            var oldKey = state.key;
-            var result = [];
+  var nestedOutput = function nestedOutput(ast, state) {
+    state = state || {};
 
-            // map nestedOutput over the ast, except group any text
-            // nodes together into a single string output.
-            var lastWasString = false;
-            for (var i = 0; i < ast.length; i++) {
-                state.key = '' + i;
-                var nodeOut = nestedOutput(ast[i], state);
-                var isString = typeof nodeOut === "string";
-                if (isString && lastWasString) {
-                    result[result.length - 1] += nodeOut;
-                } else {
-                    result.push(nodeOut);
-                }
-                lastWasString = isString;
-            }
+    if (Array.isArray(ast)) {
+      var oldKey = state.key;
+      var result = []; // map nestedOutput over the ast, except group any text
+      // nodes together into a single string output.
 
-            state.key = oldKey;
-            return result;
+      var lastWasString = false;
+
+      for (var i = 0; i < ast.length; i++) {
+        state.key = '' + i;
+        var nodeOut = nestedOutput(ast[i], state);
+        var isString = typeof nodeOut === "string";
+
+        if (isString && lastWasString) {
+          result[result.length - 1] += nodeOut;
         } else {
-            return outputFunc(ast, nestedOutput, state);
+          result.push(nodeOut);
         }
-    };
-    return nestedOutput;
+
+        lastWasString = isString;
+      }
+
+      state.key = oldKey;
+      return result;
+    } else {
+      return outputFunc(ast, nestedOutput, state);
+    }
+  };
+
+  return nestedOutput;
 };
 
 var htmlFor = function htmlFor(outputFunc) {
-    var nestedOutput = function nestedOutput(ast, state) {
-        state = state || {};
-        if (Array.isArray(ast)) {
-            return ast.map(function (node) {
-                return nestedOutput(node, state);
-            }).join("");
-        } else {
-            return outputFunc(ast, nestedOutput, state);
-        }
-    };
-    return nestedOutput;
+  var nestedOutput = function nestedOutput(ast, state) {
+    state = state || {};
+
+    if (Array.isArray(ast)) {
+      return ast.map(function (node) {
+        return nestedOutput(node, state);
+      }).join("");
+    } else {
+      return outputFunc(ast, nestedOutput, state);
+    }
+  };
+
+  return nestedOutput;
 };
 
 var sanitizeUrl = function sanitizeUrl(url) {
-    if (url == null) {
-        return null;
+  if (url == null) {
+    return null;
+  }
+
+  try {
+    var prot = decodeURIComponent(url).replace(/[^A-Za-z0-9/:]/g, '').toLowerCase();
+
+    if (prot.indexOf('javascript:') === 0) {
+      return null;
     }
-    try {
-        var prot = decodeURIComponent(url).replace(/[^A-Za-z0-9/:]/g, '').toLowerCase();
-        if (prot.indexOf('javascript:') === 0) {
-            return null;
-        }
-    } catch (e) {
-        // decodeURIComponent sometimes throws a URIError
-        // See `decodeURIComponent('a%AFc');`
-        // http://stackoverflow.com/questions/9064536/javascript-decodeuricomponent-malformed-uri-exception
-        return null;
-    }
-    return url;
+  } catch (e) {
+    // decodeURIComponent sometimes throws a URIError
+    // See `decodeURIComponent('a%AFc');`
+    // http://stackoverflow.com/questions/9064536/javascript-decodeuricomponent-malformed-uri-exception
+    return null;
+  }
+
+  return url;
 };
 
 var UNESCAPE_URL_R = /\\([^0-9A-Za-z\s])/g;
 
 var unescapeUrl = function unescapeUrl(rawUrlString) {
-    return rawUrlString.replace(UNESCAPE_URL_R, "$1");
-};
-
-// Parse some content with the parser `parse`, with state.inline
+  return rawUrlString.replace(UNESCAPE_URL_R, "$1");
+}; // Parse some content with the parser `parse`, with state.inline
 // set to true. Useful for block elements; not generally necessary
 // to be used by inline elements (where state.inline is already true.
+
+
 var parseInline = function parseInline(parse, content, state) {
-    var isCurrentlyInline = state.inline || false;
-    state.inline = true;
-    var result = parse(content, state);
-    state.inline = isCurrentlyInline;
-    return result;
+  var isCurrentlyInline = state.inline || false;
+  state.inline = true;
+  var result = parse(content, state);
+  state.inline = isCurrentlyInline;
+  return result;
 };
+
 var parseBlock = function parseBlock(parse, content, state) {
-    var isCurrentlyInline = state.inline || false;
-    state.inline = false;
-    var result = parse(content + "\n\n", state);
-    state.inline = isCurrentlyInline;
-    return result;
+  var isCurrentlyInline = state.inline || false;
+  state.inline = false;
+  var result = parse(content + "\n\n", state);
+  state.inline = isCurrentlyInline;
+  return result;
 };
 
 var BLOCK_END_R = /\n{2,}$/;
-
-Object.keys(_rules2.default).forEach(function (type, i) {
-    _rules2.default[type].order = i;
+Object.keys(_rules.default).forEach(function (type, i) {
+  _rules.default[type].order = i;
 });
 
 var ruleOutput = function ruleOutput(rules, property) {
-    if (!property && typeof console !== "undefined") {
-        console.warn("simple-markdown ruleOutput should take 'react' or " + "'html' as the second argument.");
-    }
+  if (!property && typeof console !== "undefined") {
+    console.warn("simple-markdown ruleOutput should take 'react' or " + "'html' as the second argument.");
+  } // deprecated:
 
-    // deprecated:
-    property = property || "react";
 
-    var nestedRuleOutput = function nestedRuleOutput(ast, outputFunc, state) {
-        return rules[ast.type][property](ast, outputFunc, state);
-    };
-    return nestedRuleOutput;
+  property = property || "react";
+
+  var nestedRuleOutput = function nestedRuleOutput(ast, outputFunc, state) {
+    return rules[ast.type][property](ast, outputFunc, state);
+  };
+
+  return nestedRuleOutput;
 };
 
-var defaultRawParse = parserFor(_rules2.default);
+var defaultRawParse = parserFor(_rules.default);
+
 var defaultBlockParse = function defaultBlockParse(source) {
-    return defaultRawParse(source + "\n\n", {
-        inline: false
-    });
+  return defaultRawParse(source + "\n\n", {
+    inline: false
+  });
 };
+
 var defaultInlineParse = function defaultInlineParse(source) {
-    return defaultRawParse(source, {
-        inline: true
-    });
+  return defaultRawParse(source, {
+    inline: true
+  });
 };
+
 var defaultImplicitParse = function defaultImplicitParse(source) {
-    return defaultRawParse(source, {
-        inline: !BLOCK_END_R.test(source)
-    });
+  return defaultRawParse(source, {
+    inline: !BLOCK_END_R.test(source)
+  });
 };
 
-var defaultReactOutput = reactFor(ruleOutput(_rules2.default, "react"));
-var defaultHtmlOutput = htmlFor(ruleOutput(_rules2.default, "html"));
-
+var defaultReactOutput = reactFor(ruleOutput(_rules.default, "react"));
+var defaultHtmlOutput = htmlFor(ruleOutput(_rules.default, "html"));
 var SimpleMarkdown = {
-    defaultRules: _rules2.default,
-    parserFor: parserFor,
-    ruleOutput: ruleOutput,
-    reactFor: reactFor,
-    htmlFor: htmlFor,
-
-    inlineRegex: inlineRegex,
-    blockRegex: blockRegex,
-    anyScopeRegex: anyScopeRegex,
-    parseInline: parseInline,
-    parseBlock: parseBlock,
-
-    defaultRawParse: defaultRawParse,
-    defaultBlockParse: defaultBlockParse,
-    defaultInlineParse: defaultInlineParse,
-    defaultImplicitParse: defaultImplicitParse,
-
-    defaultReactOutput: defaultReactOutput,
-    defaultHtmlOutput: defaultHtmlOutput,
-
-    preprocess: preprocess,
-    sanitizeUrl: sanitizeUrl,
-    unescapeUrl: unescapeUrl,
-
-    // deprecated:
-    defaultParse: defaultImplicitParse,
-    outputFor: reactFor,
-    defaultOutput: defaultReactOutput
+  defaultRules: _rules.default,
+  parserFor: parserFor,
+  ruleOutput: ruleOutput,
+  reactFor: reactFor,
+  htmlFor: htmlFor,
+  inlineRegex: inlineRegex,
+  blockRegex: blockRegex,
+  anyScopeRegex: anyScopeRegex,
+  parseInline: parseInline,
+  parseBlock: parseBlock,
+  defaultRawParse: defaultRawParse,
+  defaultBlockParse: defaultBlockParse,
+  defaultInlineParse: defaultInlineParse,
+  defaultImplicitParse: defaultImplicitParse,
+  defaultReactOutput: defaultReactOutput,
+  defaultHtmlOutput: defaultHtmlOutput,
+  preprocess: preprocess,
+  sanitizeUrl: sanitizeUrl,
+  unescapeUrl: unescapeUrl,
+  // deprecated:
+  defaultParse: defaultImplicitParse,
+  outputFor: reactFor,
+  defaultOutput: defaultReactOutput
 };
-
 module.exports = SimpleMarkdown;

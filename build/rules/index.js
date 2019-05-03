@@ -1,157 +1,104 @@
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = void 0;
 
-var _mapValues = require('lodash/mapValues');
+var _mapValues = _interopRequireDefault(require("lodash/mapValues"));
 
-var _mapValues2 = _interopRequireDefault(_mapValues);
+var _autolink = _interopRequireDefault(require("./autolink"));
 
-var _autolink = require('./autolink');
+var _blockQuote = _interopRequireDefault(require("./blockQuote"));
 
-var _autolink2 = _interopRequireDefault(_autolink);
+var _br = _interopRequireDefault(require("./br"));
 
-var _blockQuote = require('./blockQuote');
+var _codeBlock = _interopRequireDefault(require("./codeBlock"));
 
-var _blockQuote2 = _interopRequireDefault(_blockQuote);
+var _def = _interopRequireDefault(require("./def"));
 
-var _br = require('./br');
+var _del = _interopRequireDefault(require("./del"));
 
-var _br2 = _interopRequireDefault(_br);
+var _em = _interopRequireDefault(require("./em"));
 
-var _codeBlock = require('./codeBlock');
+var _escape = _interopRequireDefault(require("./escape"));
 
-var _codeBlock2 = _interopRequireDefault(_codeBlock);
+var _fence = _interopRequireDefault(require("./fence"));
 
-var _def = require('./def');
+var _heading = _interopRequireDefault(require("./heading"));
 
-var _def2 = _interopRequireDefault(_def);
+var _hr = _interopRequireDefault(require("./hr"));
 
-var _del = require('./del');
+var _image = _interopRequireDefault(require("./image"));
 
-var _del2 = _interopRequireDefault(_del);
+var _inlineCode = _interopRequireDefault(require("./inlineCode"));
 
-var _em = require('./em');
+var _lheading = _interopRequireDefault(require("./lheading"));
 
-var _em2 = _interopRequireDefault(_em);
+var _link = _interopRequireDefault(require("./link"));
 
-var _escape = require('./escape');
+var _list = _interopRequireDefault(require("./list"));
 
-var _escape2 = _interopRequireDefault(_escape);
+var _mailto = _interopRequireDefault(require("./mailto"));
 
-var _fence = require('./fence');
+var _newline = _interopRequireDefault(require("./newline"));
 
-var _fence2 = _interopRequireDefault(_fence);
+var _nptable = _interopRequireDefault(require("./nptable"));
 
-var _heading = require('./heading');
+var _paragraph = _interopRequireDefault(require("./paragraph"));
 
-var _heading2 = _interopRequireDefault(_heading);
+var _refimage = _interopRequireDefault(require("./refimage"));
 
-var _hr = require('./hr');
+var _reflink = _interopRequireDefault(require("./reflink"));
 
-var _hr2 = _interopRequireDefault(_hr);
+var _strong = _interopRequireDefault(require("./strong"));
 
-var _image = require('./image');
+var _table = _interopRequireDefault(require("./table"));
 
-var _image2 = _interopRequireDefault(_image);
+var _text = _interopRequireDefault(require("./text"));
 
-var _inlineCode = require('./inlineCode');
+var _u = _interopRequireDefault(require("./u"));
 
-var _inlineCode2 = _interopRequireDefault(_inlineCode);
-
-var _lheading = require('./lheading');
-
-var _lheading2 = _interopRequireDefault(_lheading);
-
-var _link = require('./link');
-
-var _link2 = _interopRequireDefault(_link);
-
-var _list = require('./list');
-
-var _list2 = _interopRequireDefault(_list);
-
-var _mailto = require('./mailto');
-
-var _mailto2 = _interopRequireDefault(_mailto);
-
-var _newline = require('./newline');
-
-var _newline2 = _interopRequireDefault(_newline);
-
-var _nptable = require('./nptable');
-
-var _nptable2 = _interopRequireDefault(_nptable);
-
-var _paragraph = require('./paragraph');
-
-var _paragraph2 = _interopRequireDefault(_paragraph);
-
-var _refimage = require('./refimage');
-
-var _refimage2 = _interopRequireDefault(_refimage);
-
-var _reflink = require('./reflink');
-
-var _reflink2 = _interopRequireDefault(_reflink);
-
-var _strong = require('./strong');
-
-var _strong2 = _interopRequireDefault(_strong);
-
-var _table = require('./table');
-
-var _table2 = _interopRequireDefault(_table);
-
-var _text = require('./text');
-
-var _text2 = _interopRequireDefault(_text);
-
-var _u = require('./u');
-
-var _u2 = _interopRequireDefault(_u);
-
-var _url = require('./url');
-
-var _url2 = _interopRequireDefault(_url);
+var _url = _interopRequireDefault(require("./url"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var rules = {
-  heading: _heading2.default,
-  nptable: _nptable2.default,
-  lheading: _lheading2.default,
-  hr: _hr2.default,
-  codeBlock: _codeBlock2.default,
-  fence: _fence2.default,
-  blockQuote: _blockQuote2.default,
-  list: _list2.default,
-  def: _def2.default,
-  table: _table2.default,
-  newline: _newline2.default,
-  paragraph: _paragraph2.default,
-  escape: _escape2.default,
-  autolink: _autolink2.default,
-  mailto: _mailto2.default,
-  url: _url2.default,
-  link: _link2.default,
-  image: _image2.default,
-  reflink: _reflink2.default,
-  refimage: _refimage2.default,
-  em: _em2.default,
-  strong: _strong2.default,
-  u: _u2.default,
-  del: _del2.default,
-  inlineCode: _inlineCode2.default,
-  br: _br2.default,
-  text: _text2.default
+const rules = {
+  heading: _heading.default,
+  nptable: _nptable.default,
+  lheading: _lheading.default,
+  hr: _hr.default,
+  codeBlock: _codeBlock.default,
+  fence: _fence.default,
+  blockQuote: _blockQuote.default,
+  list: _list.default,
+  def: _def.default,
+  table: _table.default,
+  newline: _newline.default,
+  paragraph: _paragraph.default,
+  escape: _escape.default,
+  autolink: _autolink.default,
+  mailto: _mailto.default,
+  url: _url.default,
+  link: _link.default,
+  image: _image.default,
+  reflink: _reflink.default,
+  refimage: _refimage.default,
+  em: _em.default,
+  strong: _strong.default,
+  u: _u.default,
+  del: _del.default,
+  inlineCode: _inlineCode.default,
+  br: _br.default,
+  text: _text.default
 };
+let order = 0;
 
-var order = 0;
-exports.default = (0, _mapValues2.default)(rules, function (value) {
-  var rule = value;
+var _default = (0, _mapValues.default)(rules, value => {
+  const rule = value;
   rule.order = order;
   order += 1;
   return rule;
 });
+
+exports.default = _default;

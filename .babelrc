@@ -1,10 +1,14 @@
 {
   "presets": [
-    "react",
-    ["env", {
-      "targets": {
-        "browsers": ["last 2 versions", "safari >= 7"]
+    "@babel/preset-react",
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "esmodules": true
+        }
       }
-    }]
-  ],
+    ],
+    "@babel/preset-flow"
+  ]
 }

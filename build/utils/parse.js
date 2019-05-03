@@ -3,26 +3,34 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var parseInline = exports.parseInline = function parseInline(parse, content, state) {
-  var isCurrentlyInline = state.inline || false;
+exports.ignoreCapture = exports.parseCaptureInline = exports.parseBlock = exports.parseInline = void 0;
+
+const parseInline = (parse, content, state) => {
+  const isCurrentlyInline = state.inline || false;
   state.inline = true;
-  var result = parse(content, state);
+  const result = parse(content, state);
   state.inline = isCurrentlyInline;
   return result;
 };
 
-var parseBlock = exports.parseBlock = function parseBlock(parse, content, state) {
-  var isCurrentlyInline = state.inline || false;
+exports.parseInline = parseInline;
+
+const parseBlock = (parse, content, state) => {
+  const isCurrentlyInline = state.inline || false;
   state.inline = false;
-  var result = parse(content + "\n\n", state);
+  const result = parse("".concat(content, "\n\n"), state);
   state.inline = isCurrentlyInline;
   return result;
 };
 
-var parseCaptureInline = exports.parseCaptureInline = function parseCaptureInline(capture, parse, state) {
-  return {
-    content: parseInline(parse, capture[1], state)
-  };
-};
+exports.parseBlock = parseBlock;
 
-var ignoreCapture = exports.ignoreCapture = function ignoreCapture() {};
+const parseCaptureInline = (capture, parse, state) => ({
+  content: parseInline(parse, capture[1], state)
+});
+
+exports.parseCaptureInline = parseCaptureInline;
+
+const ignoreCapture = () => {};
+
+exports.ignoreCapture = ignoreCapture;
