@@ -26,7 +26,7 @@ const heading = {
   react(node, output, state) {
     const Node = "h".concat(node.level);
     const compiledOutput = output(node.content, state);
-    let id = null;
+    let id = null; // Readable slugs for easy anchor links
 
     if (compiledOutput.length === 1 && typeof compiledOutput[0] === 'string') {
       id = (0, _slugify.default)(compiledOutput[0], {
